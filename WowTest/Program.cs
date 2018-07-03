@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
+using Microsoft.Win32;
 
-namespace NativeServer
+namespace WowTest
 {
     static class Program
     {
@@ -15,9 +16,7 @@ namespace NativeServer
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new SocketTest());
-
-
+            Application.Run(new Form1());
 
         }
     }
