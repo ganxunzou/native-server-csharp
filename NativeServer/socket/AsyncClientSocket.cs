@@ -126,13 +126,15 @@ namespace NativeServer.socket
                     {
                         List<CommunicateVO> cos = CommunicateUtils.strToCommunicateVos(content);
                         Receive(client, cos);
+
+                        // 重置数据传输对象
+                        state.cleanData();
                     }
-                    else
-                    {
-                        // Get the rest of the data.
-                        client.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(ReceiveCallback), state);
-                    }
-                        
+
+
+                    // Get the rest of the data.
+                    client.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(ReceiveCallback), state);
+
                 }
                 else
                 {
