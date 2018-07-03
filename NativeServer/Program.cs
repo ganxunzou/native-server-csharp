@@ -15,9 +15,7 @@ namespace NativeServer
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new SocketForm());
-
-
+            Application.Run(new ServerForm());
 
         }
     }

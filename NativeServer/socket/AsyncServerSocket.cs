@@ -18,10 +18,12 @@ namespace NativeServer.socket
         public static ManualResetEvent allDone = new ManualResetEvent(false);
         public static int localPort = 0;
         private static AsyncServerSocket _asyncServer;
-        public static Dictionary<int, Socket> clientSockets { get; private set; }
+        //public static Dictionary<int, Socket> clientSockets { get; private set; }
 
         // server 接受消息回调函数
         private static ServerReceiveHandler _receiveHander;
+        private static ServerSocketPortHandler _portHanlder;
+        private static AcceptSocketHandler _acceptHandler;
 
         /// <summary>
         /// 私有构造函数，不允许直接new 实例化
@@ -37,17 +39,19 @@ namespace NativeServer.socket
         /// <param name="ip"></param>
         /// <param name="port"></param>
         /// <param name="receiveHander"></param>
-        public static void initSocketServer( string ip = "127.0.0.1", int port = 0, ServerReceiveHandler receiveHander = null, ServerSocketPortHandler portHanlder = null)
+        public static void initSocketServer( string ip = "127.0.0.1", int port = 0, ServerReceiveHandler receiveHander = null, ServerSocketPortHandler portHanlder = null, AcceptSocketHandler acceptHandler = null)
         {
             if (null == _asyncServer)
             {
                 _receiveHander = receiveHander;
+                _portHanlder = portHanlder;
+                _acceptHandler = acceptHandler;
 
                 _asyncServer = new AsyncServerSocket();
 
-                clientSockets = new Dictionary<int, Socket>();
+                // clientSockets = new Dictionary<int, Socket>();
 
-                _asyncServer.StartListening(ip, port, portHanlder);
+                _asyncServer.StartListening(ip, port);
             }
         }
 
@@ -68,7 +72,7 @@ namespace NativeServer.socket
         /// </summary>
         /// <param name="ip"></param>
         /// <param name="port"></param>
-        private void StartListening(string ip = "127.0.0.1", int port = 0, ServerSocketPortHandler portHanlder = null)
+        private void StartListening(string ip = "127.0.0.1", int port = 0)
         {
             // Data buffer for incoming data.
             byte[] bytes = new Byte[1024];
@@ -85,9 +89,9 @@ namespace NativeServer.socket
                 serverSocket.Bind(localEndPoint);
                 localPort = ((IPEndPoint)serverSocket.LocalEndPoint).Port;
                 Console.WriteLine("server socket listen port: {0}", localPort);
-                if(portHanlder != null)
+                if(_portHanlder != null)
                 {
-                    portHanlder(localPort);
+                    _portHanlder(localPort);
                 }
                 serverSocket.Listen(localPort);
 
@@ -130,10 +134,14 @@ namespace NativeServer.socket
             Socket listener = (Socket)ar.AsyncState;
             Socket handler = listener.EndAccept(ar);
 
-            int localPort = ((IPEndPoint)handler.LocalEndPoint).Port;
-            if (!clientSockets.ContainsKey(localPort))
+            // int remotePort = ((IPEndPoint)handler.RemoteEndPoint).Port;
+            //if (!clientSockets.ContainsKey(remotePort))
+            //{
+            //    clientSockets.Add(remotePort, handler);
+            //}
+            if(_acceptHandler != null)
             {
-                clientSockets.Add(localPort, handler);
+                _acceptHandler(handler);
             }
 
             // Create the state object.

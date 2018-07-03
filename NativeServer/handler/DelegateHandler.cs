@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NativeServer.socket.co;
+using NativeServer.socket.co.cro;
 using System.Net.Sockets;
 
 /// <summary>
@@ -49,4 +50,16 @@ namespace NativeServer.handler
     /// <param name="cos"></param>
     public delegate void ServerSocketPortHandler(int port);
 
+    /// <summary>
+    /// Accept Client Socket
+    /// </summary>
+    /// <param name="cos"></param>
+    public delegate void AcceptSocketHandler(Socket socket);
+
+
+    /// <summary>
+    /// Download File Handler 
+    /// </summary>
+    /// <param name="cos"></param>
+    public delegate void DownloadFileHandler(DownloadFileCro cro);
 }

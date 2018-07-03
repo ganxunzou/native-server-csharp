@@ -11,9 +11,24 @@ namespace NativeServer.socket.co
     /// </summary>
     public class OpenFileCo : CommunicateVO
     {
+        private string filePath;
+
         public OpenFileCo() : base(CMType.OpenFile)
         {
 
+        }
+
+        public string FilePath
+        {
+            get
+            {
+                return filePath;
+            }
+
+            set
+            {
+                filePath = value;
+            }
         }
     }
 }
