@@ -37,7 +37,7 @@ namespace NativeServer.socket
         /// <param name="ip"></param>
         /// <param name="port"></param>
         /// <param name="receiveHander"></param>
-        public static void initSocketServer( string ip = "127.0.0.1", int port = 0, ServerReceiveHandler receiveHander = null)
+        public static void initSocketServer( string ip = "127.0.0.1", int port = 0, ServerReceiveHandler receiveHander = null, ServerSocketPortHandler portHanlder = null)
         {
             if (null == _asyncServer)
             {
@@ -47,7 +47,7 @@ namespace NativeServer.socket
 
                 clientSockets = new Dictionary<int, Socket>();
 
-                _asyncServer.StartListening(ip, port);
+                _asyncServer.StartListening(ip, port, portHanlder);
             }
         }
 
@@ -68,7 +68,7 @@ namespace NativeServer.socket
         /// </summary>
         /// <param name="ip"></param>
         /// <param name="port"></param>
-        private void StartListening(string ip = "127.0.0.1", int port = 0)
+        private void StartListening(string ip = "127.0.0.1", int port = 0, ServerSocketPortHandler portHanlder = null)
         {
             // Data buffer for incoming data.
             byte[] bytes = new Byte[1024];
@@ -85,6 +85,10 @@ namespace NativeServer.socket
                 serverSocket.Bind(localEndPoint);
                 localPort = ((IPEndPoint)serverSocket.LocalEndPoint).Port;
                 Console.WriteLine("server socket listen port: {0}", localPort);
+                if(portHanlder != null)
+                {
+                    portHanlder(localPort);
+                }
                 serverSocket.Listen(localPort);
 
                 while (true)
@@ -163,15 +167,15 @@ namespace NativeServer.socket
                 {
                     List<CommunicateVO> cos = CommunicateUtils.strToCommunicateVos(content);
                     Receive(handler, cos);
-                }
-                else
-                {
-                    // 继续获取数据
-                    handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(ReceiveCallback), state);
-                }
 
-                    
+                    // 重置数据传输对象
+                    state.cleanData();
+                }
             }
+
+            // 继续获取数据
+            handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(ReceiveCallback), state);
+
         }
 
         /// <summary>
@@ -200,13 +204,15 @@ namespace NativeServer.socket
                 int bytesSent = handler.EndSend(ar);
                 Console.WriteLine("Sent {0} bytes to client.", bytesSent);
 
-                handler.Shutdown(SocketShutdown.Both);
-                handler.Close();
+                // 释放链接。Server Socket 不主动释放客户端连接。保持长连接方式
+                // handler.Shutdown(SocketShutdown.Both);
+                // handler.Close();
 
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
+                throw e;
             }
         }
 
@@ -218,7 +224,7 @@ namespace NativeServer.socket
         public void Receive(Socket socket, List<CommunicateVO> cos)
         {
             if (_receiveHander != null)
-                _receiveHander.Invoke(cos);
+                _receiveHander.Invoke(socket, cos);
         }
 
         /// <summary>

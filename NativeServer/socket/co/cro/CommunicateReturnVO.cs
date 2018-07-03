@@ -11,9 +11,26 @@ namespace NativeServer.socket.co.cro
     /// </summary>
     public class CommunicateReturnVO : CommunicateVO
     {
+
+        /// <summary>
+        /// 用于区分CommunicateVo 和 CommunicateReturnVo
+        /// 因为JSON序列化后，无法区分CommunicateVo 和 CommunicateReturnVo
+        /// </summary>
+        private bool cro = true;
+
         public CommunicateReturnVO(CMType type): base(type)
         {
 
+        }
+
+        public bool Cro
+        {
+            get
+            {
+                return cro;
+            }
+
+            private set { }
         }
     }
 }

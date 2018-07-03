@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NativeServer.socket.co;
+using NativeServer.socket.co.cro;
 using NativeServer.socket;
 using NativeServer.socket.constant;
 using NativeServer.exception;
@@ -38,7 +39,15 @@ namespace NativeServer.socket.utils
 
                     if ((int)CMType.CallExe == (cmType))
                     {
-                        list.Add(JsonConvert.DeserializeObject<CallExeCo>(result));
+                        if (iCro(result))
+                        {
+                            list.Add(JsonConvert.DeserializeObject<CallExeCro>(result));
+                        }
+                        else
+                        {
+                            list.Add(JsonConvert.DeserializeObject<CallExeCo>(result));
+                        }
+                        
                     }
                     else if ((int)CMType.DownloadFile == (cmType))
                     {
@@ -56,7 +65,7 @@ namespace NativeServer.socket.utils
                     {
                         throw new CMTypeNotFoundException("没有找到对应的通讯类型(CMType),当前值：" + cmType);
                     }
-
+                    Console.WriteLine("strToCommunicateVos result:{0}", result);
                     data = data.Remove(startIndex, endIndex + SUFFIX.Length - startIndex);
                 }
             }
@@ -84,6 +93,14 @@ namespace NativeServer.socket.utils
             int cmType = int.Parse(str.Substring(i + 8, 1));
 
             return cmType;
+        }
+
+        private static bool iCro(string str)
+        {
+            if (str == null)
+                return false;
+
+            return str.ToLower().IndexOf("\"cro\":") > -1;
         }
 
         /// <summary>

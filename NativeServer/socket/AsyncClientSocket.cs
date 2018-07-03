@@ -8,6 +8,7 @@ using System.Threading;
 using NativeServer.socket.co;
 using NativeServer.exception;
 using NativeServer.socket.utils;
+using NativeServer.handler;
 
 
 namespace NativeServer.socket
@@ -19,38 +20,13 @@ namespace NativeServer.socket
     public class AsyncClientSocket : ICommunicate
     {
         // ManualResetEvent instances signal completion.
-        private static ManualResetEvent connectDone =  new ManualResetEvent(false);
-        private static ManualResetEvent sendDone = new ManualResetEvent(false);
-        private static ManualResetEvent receiveDone = new ManualResetEvent(false);
-        
-        private static AsyncClientSocket _asyncClientSocket;
+        private ManualResetEvent connectDone =  new ManualResetEvent(false);
+        private ManualResetEvent sendDone = new ManualResetEvent(false);
+        private ManualResetEvent receiveDone = new ManualResetEvent(false);
 
-        private static Socket socket;
-        
-        private AsyncClientSocket()
-        {
+        private Socket socket;
 
-        }
-
-        public static void initClientSocket(string ip = "127.0.0.1", int port = 0)
-        {
-            if (null == _asyncClientSocket)
-            {
-                _asyncClientSocket = new AsyncClientSocket();
-
-                _asyncClientSocket.StartClient(ip, port);
-            }
-        }
-
-        public static AsyncClientSocket getInstance()
-        {
-            if (_asyncClientSocket == null)
-                throw new ClientSocketNotInitException("Server Socket 未初始化，请调用initSocketServer静态方法进行初始化");
-
-            return _asyncClientSocket;
-        }
-
-        private void StartClient(string ip = "127.0.0.1", int port = 0)
+        public void createSocketConnect(string ip = "127.0.0.1", int port = 0, ClientSocketPortHandler portHandler = null)
         {
             try
             {
@@ -62,11 +38,16 @@ namespace NativeServer.socket
                     SocketType.Stream, ProtocolType.Tcp);
 
 
-                
-
                 // Connect to the remote endpoint.
                 socket.BeginConnect(remoteEP,
                     new AsyncCallback(ConnectCallback), socket);
+
+                int localPort = ((IPEndPoint)socket.LocalEndPoint).Port;
+                if (portHandler != null)
+                {
+                    portHandler(localPort);
+                }
+
                 connectDone.WaitOne();
 
                 // Send test data to the remote device.
@@ -77,18 +58,12 @@ namespace NativeServer.socket
                 Receive(socket);
                 receiveDone.WaitOne();
 
-                // Write the response to the console.
-                // Console.WriteLine("Response received : {0}", response);
-
-                // Release the socket.
-                // client.Shutdown(SocketShutdown.Both);
-                // client.Close();
-
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
             }
+            
         }
 
         private void ConnectCallback(IAsyncResult ar)
@@ -143,23 +118,30 @@ namespace NativeServer.socket
                 // Read data from the remote device.
                 int bytesRead = client.EndReceive(ar);
 
-                if (bytesRead > 0)
+                if (bytesRead > 0 )
                 {
-                    // There might be more data, so store the data received so far.
                     state.sb.Append(Encoding.UTF8.GetString(state.buffer, 0, bytesRead));
-                    
-                    // Get the rest of the data.
-                    client.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
-                        new AsyncCallback(ReceiveCallback), state);
-                }
-                else
-                {
                     string content = state.sb.ToString();
-                    if (content.IndexOf("####") >= 0)
+                    if (content.IndexOf("####") > -1)
                     {
                         List<CommunicateVO> cos = CommunicateUtils.strToCommunicateVos(content);
                         Receive(client, cos);
                     }
+                    else
+                    {
+                        // Get the rest of the data.
+                        client.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(ReceiveCallback), state);
+                    }
+                        
+                }
+                else
+                {
+                    //string content = state.sb.ToString();
+                    //if (content.IndexOf("####") >= 0)
+                    //{
+                    //    List<CommunicateVO> cos = CommunicateUtils.strToCommunicateVos(content);
+                    //    Receive(client, cos);
+                    //}
 
                     // Signal that all bytes have been received.
                     receiveDone.Set();
@@ -204,7 +186,7 @@ namespace NativeServer.socket
 
         public void Receive(Socket socket, List<CommunicateVO> cos)
         {
-            
+            Console.WriteLine("aaaa", cos.Count);   
         }
 
         public void Send(Socket socket, CommunicateVO co)

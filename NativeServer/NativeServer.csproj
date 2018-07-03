@@ -67,28 +67,24 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppServer.cs" />
+    <Compile Include="app\CallExeServer.cs" />
     <Compile Include="exception\ClientSocketNotInitException.cs" />
     <Compile Include="exception\CMTypeNotFoundException.cs" />
     <Compile Include="exception\ServerSocketNotInitException.cs" />
-    <Compile Include="Form1.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
-    </Compile>
     <Compile Include="handler\DelegateHandler.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SocketTest.cs">
+    <Compile Include="SocketForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SocketTest.Designer.cs">
-      <DependentUpon>SocketTest.cs</DependentUpon>
+    <Compile Include="SocketForm.Designer.cs">
+      <DependentUpon>SocketForm.cs</DependentUpon>
     </Compile>
     <Compile Include="socket\AsyncClientSocket.cs" />
     <Compile Include="socket\AsyncServerSocket.cs" />
     <Compile Include="socket\constant\CMType.cs" />
     <Compile Include="socket\co\CommunicateVO.cs" />
+    <Compile Include="socket\co\cro\CallExeCro.cs" />
     <Compile Include="socket\co\DownloadFileCo.cs" />
     <Compile Include="socket\co\CallExeCo.cs" />
     <Compile Include="socket\co\OpenFileCo.cs" />
@@ -108,8 +104,8 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="SocketTest.resx">
-      <DependentUpon>SocketTest.cs</DependentUpon>
+    <EmbeddedResource Include="SocketForm.resx">
+      <DependentUpon>SocketForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
     <None Include="packages.config" />

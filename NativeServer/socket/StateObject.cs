@@ -16,5 +16,11 @@ namespace NativeServer.socket
         public byte[] buffer = new byte[BufferSize];
         // Received data string.
         public StringBuilder sb = new StringBuilder();
+
+        public void cleanData()
+        {
+            buffer = new byte[BufferSize];
+            sb = new StringBuilder();
+        }
     }
 }
