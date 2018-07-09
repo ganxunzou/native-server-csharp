@@ -15,9 +15,25 @@ namespace NativeServer.socket.co
         // CMType 枚举类
         public CMType cmType { get; private set; }
 
+        public string Uuid
+        {
+            get
+            {
+                return uuid;
+            }
+
+            set
+            {
+                uuid = value;
+            }
+        }
+
+        private string uuid;
+
         public CommunicateVO(CMType cmType)
         {
             this.cmType = cmType;
+            this.uuid = Guid.NewGuid().ToString();
         }
     }
 }
